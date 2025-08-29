@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <!-- 禁用缩放，提升移动端体验 -->
@@ -44,6 +44,9 @@
             color: #333;
             position: relative;
             overflow-x: hidden;
+            /* 优化移动端滚动 */
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
         }
 
         body::before {
@@ -537,6 +540,15 @@
                 appearance: none;
                 min-height: 50px;
                 box-sizing: border-box;
+                /* 修复移动端触摸问题 */
+                -webkit-user-select: text;
+                user-select: text;
+                -webkit-touch-callout: default;
+                touch-action: manipulation;
+                /* 确保输入框可点击 */
+                pointer-events: auto;
+                z-index: 10;
+                position: relative;
             }
             
             .form-group select {
@@ -562,6 +574,18 @@
                 margin-top: 20px;
                 -webkit-tap-highlight-color: transparent;
                 touch-action: manipulation;
+                /* 确保按钮可点击 */
+                cursor: pointer;
+                pointer-events: auto;
+                position: relative;
+                z-index: 10;
+                /* 修复移动端点击问题 */
+                -webkit-user-select: none;
+                user-select: none;
+                display: block;
+                width: 100%;
+                border: none;
+                outline: none;
             }
             
             /* 图片预览移动端优化 */
@@ -628,6 +652,35 @@
             
             .floating-hearts {
                 display: none; /* 横屏时隐藏装饰，节省性能 */
+            }
+        }
+
+        /* 全局触摸优化 */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* 但允许表单元素选择文本 */
+        input, textarea, select {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+            -webkit-touch-callout: default !important;
+        }
+
+        /* 确保点击区域足够大 */
+        button, .btn {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+        }
+
+        /* 防止iOS safari底部条遮挡 */
+        @supports(padding: max(0px)) {
+            body {
+                padding-bottom: max(20px, env(safe-area-inset-bottom));
             }
         }
     </style>
@@ -770,16 +823,28 @@
     <script>
         // PWA安装相关
         let deferredPrompt;
+        let installPromptShown = false;
         
         window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('beforeinstallprompt 事件触发');
             e.preventDefault();
             deferredPrompt = e;
             
-            // 显示安装提示
-            setTimeout(() => {
-                document.getElementById('installPrompt').style.display = 'block';
-            }, 5000); // 5秒后显示
+            // 立即显示安装提示（移动端优化）
+            if (!installPromptShown) {
+                setTimeout(() => {
+                    showInstallPrompt();
+                }, 2000); // 2秒后显示
+            }
         });
+        
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('installPrompt');
+            if (installPrompt && !installPromptShown) {
+                installPrompt.style.display = 'block';
+                installPromptShown = true;
+            }
+        }
         
         function installApp() {
             if (deferredPrompt) {
@@ -791,18 +856,46 @@
                     deferredPrompt = null;
                     document.getElementById('installPrompt').style.display = 'none';
                 });
+            } else {
+                // 备用方案：显示手动安装指引
+                alert('请点击浏览器菜单中的"添加到主屏幕"或"安装"选项');
             }
         }
         
         function dismissInstall() {
             document.getElementById('installPrompt').style.display = 'none';
+            installPromptShown = true;
+        }
+        
+        // 检测iOS设备并显示安装提示
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent);
+        }
+        
+        function isInStandaloneMode() {
+            return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
+        }
+        
+        // iOS设备显示安装提示
+        if (isIOS() && !isInStandaloneMode()) {
+            setTimeout(() => {
+                showInstallPrompt();
+            }, 3000);
         }
         
         // 注册Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
-                .then(registration => console.log('SW注册成功'))
-                .catch(error => console.log('SW注册失败'));
+                .then(registration => {
+                    console.log('SW注册成功');
+                    // Service Worker 注册成功后也显示安装提示
+                    if (!installPromptShown) {
+                        setTimeout(() => {
+                            showInstallPrompt();
+                        }, 5000);
+                    }
+                })
+                .catch(error => console.log('SW注册失败', error));
         }
     </script>
     
