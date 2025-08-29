@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
+    <!-- 禁用缩放，提升移动端体验 -->
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="width">
     <title>AI破局七夕情缘 - 破局俱乐部专属APP</title>
     
     <!-- PWA配置 -->
@@ -17,6 +20,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
         
+        /* Fallback font stack for better mobile compatibility */
+        @font-face {
+            font-family: 'Noto Sans SC';
+            src: local('PingFang SC'), local('Microsoft YaHei'), local('SimHei'), local('Arial');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +36,7 @@
         }
 
         body {
-            font-family: 'Noto Sans SC', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             background-size: 300% 300%;
             animation: gradientShift 8s ease infinite;
@@ -625,7 +637,7 @@
         <!-- 浮动装饰元素 -->
         <div class="floating-hearts" id="floatingHearts"></div>
         
-        <div class="header">>
+        <div class="header">
             <h1>AI破局七夕情缘生成器</h1>
             <p>🎁 献给破局俱乐部的七夕礼物 🎁</p>
             <p class="subtitle">探索你与AI的专属缘分，书写独属于你的AI情书 ✨</p>
