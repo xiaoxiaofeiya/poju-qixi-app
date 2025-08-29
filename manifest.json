@@ -2,7 +2,7 @@
   "name": "AI破局七夕情缘",
   "short_name": "破局七夕",
   "description": "AI破局俱乐部专属七夕礼物，生成个性化表白情书",
-  "start_url": "./index.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#667eea",
@@ -23,19 +23,5 @@
   ],
   "categories": ["lifestyle", "entertainment"],
   "lang": "zh-CN",
-  "scope": "./",
-  "screenshots": [
-    {
-      "src": "screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshot-narrow.png", 
-      "sizes": "640x1136",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ]
+  "scope": "/"
 }

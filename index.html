@@ -786,8 +786,13 @@
                 <p style="margin-top: 15px;">正在为你生成专属AI情书...</p>
             </div>
 
-            <button class="btn" onclick="generateLoveLetter()">
+            <button class="btn" onclick="generateLoveLetter()" id="generateBtn">
                 🎨 生成我的AI情书 ✨
+            </button>
+            
+            <!-- 移动端调试按钮 -->
+            <button class="btn" onclick="testMobileClick()" id="debugBtn" style="background: #e74c3c; margin-top: 10px; display: none;">
+                🔧 移动端测试按钮
             </button>
         </div>
 
@@ -894,32 +899,96 @@
             }, 1000);
         });
         
-        // 安装APP
+        // 安装APP - 增强调试版本
         function installApp() {
             const os = getMobileOperatingSystem();
+            console.log('点击安装按钮，检测系统:', os);
+            console.log('deferredPrompt状态:', deferredPrompt);
             
             if (deferredPrompt) {
+                console.log('使用deferredPrompt安装');
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     console.log('用户选择:', choiceResult.outcome);
                     if (choiceResult.outcome === 'accepted') {
                         console.log('用户接受了安装');
+                        alert('安装成功！请查看主屏幕');
+                    } else {
+                        console.log('用户拒绝了安装');
                     }
                     deferredPrompt = null;
                     document.getElementById('installPrompt').style.display = 'none';
+                }).catch(err => {
+                    console.error('安装过程出错:', err);
+                    showManualInstallInstructions(os);
                 });
             } else {
-                // 根据系统显示不同提示
-                let message = '';
-                if (os === 'iOS') {
-                    message = '请点击Safari底部的分享按钮，然后选择"添加到主屏幕"';
-                } else if (os === 'Android') {
-                    message = '请点击浏览器菜单中的"添加到主屏幕"或"安装应用"';
-                } else {
-                    message = '请点击浏览器菜单中的"安装"或"添加到主屏幕"选项';
-                }
-                alert(message);
+                console.log('deferredPrompt不可用，显示手动安装指引');
+                showManualInstallInstructions(os);
             }
+        }
+        
+        // 显示手动安装指引
+        function showManualInstallInstructions(os) {
+            let message = '';
+            let title = '手动安装指引';
+            
+            if (os === 'iOS') {
+                message = `请按以下步骤操作：
+1. 点击Safari底部的"分享"按钮 📤
+2. 滑动找到"添加到主屏幕" 📱
+3. 点击"添加"确认安装
+
+提示：如果没有看到"添加到主屏幕"选项，说明网站不满足PWA安装条件。`;
+            } else if (os === 'Android') {
+                message = `请按以下步骤操作：
+1. 点击浏览器右上角的菜单按钮 ⋮
+2. 选择"添加到主屏幕"或"安装应用" 📱
+3. 确认安装
+
+注意：不同的Android浏览器选项位置可能略有不同。`;
+            } else {
+                message = `请按以下步骤操作：
+1. 点击浏览器地址栏右侧的安装图标
+2. 或通过浏览器菜单选择"安装应用"
+3. 确认安装`;
+            }
+            
+            // 创建自定义弹窗而不是alert
+            showCustomInstallDialog(title, message);
+        }
+        
+        // 自定义安装指引弹窗
+        function showCustomInstallDialog(title, message) {
+            const dialog = document.createElement('div');
+            dialog.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 90%;
+                text-align: left;
+            `;
+            
+            dialog.innerHTML = `
+                <h3 style="color: #667eea; margin-bottom: 15px;">${title}</h3>
+                <div style="white-space: pre-line; line-height: 1.6; margin-bottom: 20px;">${message}</div>
+                <button onclick="this.parentNode.remove()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; float: right;">我知道了</button>
+            `;
+            
+            document.body.appendChild(dialog);
+            
+            // 3秒后自动关闭
+            setTimeout(() => {
+                if (dialog.parentNode) {
+                    dialog.remove();
+                }
+            }, 8000);
         }
         
         function dismissInstall() {
@@ -927,20 +996,128 @@
             installPromptShown = true;
         }
         
-        // 页面加载后的初始化
+        // 页面加载后的初始化 - 增强调试版本
         document.addEventListener('DOMContentLoaded', function() {
             const os = getMobileOperatingSystem();
+            console.log('=== PWA调试信息 ===');
             console.log('检测到设备:', os);
+            console.log('User Agent:', navigator.userAgent);
             console.log('是否为独立模式:', isInStandaloneMode());
+            console.log('是否支持Service Worker:', 'serviceWorker' in navigator);
+            console.log('当前协议:', location.protocol);
+            console.log('当前域名:', location.hostname);
+            
+            // 检查PWA安装条件
+            if ('serviceWorker' in navigator && 'PushManager' in window) {
+                console.log('✅ PWA基础条件满足');
+            } else {
+                console.log('❌ PWA基础条件不满足');
+            }
+            
+            // 修复移动端按钮点击问题
+            setupMobileClickFix();
             
             // 如果是移动设备且未安装，显示安装提示
             if ((os === 'iOS' || os === 'Android') && !isInStandaloneMode()) {
+                console.log('准备显示安装提示...');
                 // 延迟显示，让用户先看到内容
                 setTimeout(() => {
+                    console.log('显示安装提示');
                     showInstallPrompt();
                 }, 3000);
+            } else {
+                console.log('跳过安装提示 - 设备:', os, '独立模式:', isInStandaloneMode());
             }
         });
+        
+        // 移动端测试函数
+        function testMobileClick() {
+            console.log('移动端测试按钮被点击！');
+            alert('移动端点击测试成功！🎉\n\n如果你看到这个弹窗，说明按钮点击功能正常。');
+        }
+        
+        // 修复移动端按钮点击问题
+        function setupMobileClickFix() {
+            console.log('设置移动端点击修复...');
+            
+            // 检测移动设备并显示调试按钮
+            const os = getMobileOperatingSystem();
+            if (os === 'iOS' || os === 'Android') {
+                const debugBtn = document.getElementById('debugBtn');
+                if (debugBtn) {
+                    debugBtn.style.display = 'block';
+                    console.log('显示移动端调试按钮');
+                }
+            }
+            
+            // 获取生成按钮
+            const generateBtn = document.getElementById('generateBtn');
+            if (generateBtn) {
+                console.log('找到生成按钮，添加事件监听器');
+                
+                // 移除可能阻止点击的样式
+                generateBtn.style.pointerEvents = 'auto';
+                generateBtn.style.zIndex = '9999';
+                
+                // 添加多重事件监听
+                generateBtn.addEventListener('click', function(e) {
+                    console.log('按钮被点击了！');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // 检查script.js是否已加载
+                    if (typeof generateLoveLetter === 'function') {
+                        console.log('调用generateLoveLetter函数');
+                        generateLoveLetter();
+                    } else {
+                        console.error('generateLoveLetter函数不存在！检查script.js是否加载');
+                        alert('生成函数加载失败，请检查网络连接并刷新页面重试');
+                        
+                        // 尝试重新加载script.js
+                        const script = document.createElement('script');
+                        script.src = './script.js';
+                        script.onload = () => {
+                            console.log('script.js重新加载成功');
+                            if (typeof generateLoveLetter === 'function') {
+                                generateLoveLetter();
+                            }
+                        };
+                        script.onerror = () => {
+                            console.error('script.js重新加载失败');
+                        };
+                        document.head.appendChild(script);
+                    }
+                }, { passive: false });
+                
+                // 移动端添加touch事件
+                generateBtn.addEventListener('touchstart', function(e) {
+                    console.log('触摸开始');
+                    generateBtn.style.backgroundColor = '#5a67d8';
+                }, { passive: true });
+                
+                generateBtn.addEventListener('touchend', function(e) {
+                    console.log('触摸结束，触发点击');
+                    setTimeout(() => {
+                        generateBtn.style.backgroundColor = '';
+                    }, 150);
+                }, { passive: true });
+                
+            } else {
+                console.error('未找到生成按钮！');
+            }
+            
+            // 检查所有按钮
+            const allButtons = document.querySelectorAll('.btn, button');
+            console.log('找到', allButtons.length, '个按钮');
+            
+            allButtons.forEach((btn, index) => {
+                console.log('按钮', index, ':', btn.textContent.trim().substring(0, 20));
+                // 确保所有按钮都可点击
+                btn.style.pointerEvents = 'auto';
+                btn.style.position = 'relative';
+                btn.style.zIndex = '1000';
+            });
+        }
         
         // 注册Service Worker
         if ('serviceWorker' in navigator) {
