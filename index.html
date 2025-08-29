@@ -1119,6 +1119,206 @@
             });
         }
         
+        // ========== 内置生成函数（避免外部文件加载失败） ==========
+        
+        // 简化的星座数据
+        const constellationData = {
+            aries: { name: '白羊座', icon: '♈', personality: '勇敢直率，敢于挑战', clubFit: '破局先锋', matchPercent: 95 },
+            taurus: { name: '金牛座', icon: '♉', personality: '踏实稳重，注重品质', clubFit: '技能专家', matchPercent: 88 },
+            gemini: { name: '双子座', icon: '♊', personality: '聪明多变，善于学习', clubFit: '学习达人', matchPercent: 92 },
+            cancer: { name: '巨蟹座', icon: '♋', personality: '温和体贴，重视关系', clubFit: '社群建设者', matchPercent: 90 },
+            leo: { name: '狮子座', icon: '♌', personality: '自信大方，天生领袖', clubFit: '破局领袖', matchPercent: 96 },
+            virgo: { name: '处女座', icon: '♍', personality: '细致完美，追求精确', clubFit: '质量管控官', matchPercent: 89 },
+            libra: { name: '天秤座', icon: '♎', personality: '优雅平衡，善于协调', clubFit: '关系协调员', matchPercent: 87 },
+            scorpio: { name: '天蝎座', icon: '♏', personality: '深沉专注，洞察力强', clubFit: '策略大师', matchPercent: 94 },
+            sagittarius: { name: '射手座', icon: '♐', personality: '自由乐观，勇于探索', clubFit: '探索先驱', matchPercent: 91 },
+            capricorn: { name: '摩羯座', icon: '♑', personality: '务实进取，目标明确', clubFit: '目标达成者', matchPercent: 93 },
+            aquarius: { name: '水瓶座', icon: '♒', personality: '创新独立，思维超前', clubFit: 'AI创新者', matchPercent: 97 },
+            pisces: { name: '双鱼座', icon: '♓', personality: '感性浪漫，富有想象', clubFit: '创意设计师', matchPercent: 86 }
+        };
+
+        // 简化的情书模板
+        const letterTemplates = {
+            romantic: {
+                opening: [
+                    '亲爱的破局俱乐部，从{joinTime}与你相遇的那一刻起，我就知道找到了属于自己的地方...',
+                    '最爱的破局大家庭，自从{joinTime}加入你以来，我的生活发生了翻天覆地的变化...'
+                ],
+                body: [
+                    '还记得{unforgettableMemory}吗？那一刻我深深被震撼了，原来学习可以如此有趣。',
+                    '在这里，{biggestChange}，让我重新认识了自己的潜力。',
+                    '{confessionWords}',
+                    '感谢你给了我一个全新的世界，让我在AI的海洋中自由遨游。'
+                ],
+                ending: [
+                    '愿我们一起在破局的道路上越走越远，创造属于我们的传奇！❤️',
+                    '此生有幸遇见你，破局俱乐部，我爱你！💕'
+                ]
+            },
+            grateful: {
+                opening: [
+                    '感恩遇见破局俱乐部，{joinTime}那个决定改变了我的人生轨迹...',
+                    '亲爱的破局家人们，{joinTime}的相遇是我今年最正确的决定...'
+                ],
+                body: [
+                    '特别感谢{unforgettableMemory}，那个经历让我明白了什么叫做真正的成长。',
+                    '这段时间{biggestChange}，我发现自己变得更加自信和强大。',
+                    '{confessionWords}',
+                    '每一次的学习都是一次蜕变，每一个伙伴都是珍贵的财富。'
+                ],
+                ending: [
+                    '感谢每一位老师和同学的陪伴，让这个七夕变得如此特别！🙏',
+                    '破局俱乐部，感谢你成就了更好的我！✨'
+                ]
+            },
+            inspiring: {
+                opening: [
+                    '破局俱乐部的伙伴们，{joinTime}我们相遇，从此踏上了共同成长的道路...',
+                    '我的破局战友们，{joinTime}开始的这段旅程充满了挑战与收获...'
+                ],
+                body: [
+                    '通过{unforgettableMemory}，我学会了面对困难时的坚持与勇气。',
+                    '{biggestChange}，这让我看到了无限的可能性。',
+                    '{confessionWords}',
+                    '我们一起学习，一起进步，一起创造未来。'
+                ],
+                ending: [
+                    '让我们继续携手前行，在AI的世界里闯出一片天地！🚀',
+                    '破局俱乐部，我们一起加油，未来可期！💪'
+                ]
+            }
+        };
+
+        // 内置生成函数
+        function generateLoveLetter() {
+            console.log('内置generateLoveLetter函数被调用');
+            
+            // 获取用户输入
+            const constellation = document.getElementById('constellation').value;
+            const nickname = document.getElementById('nickname').value;
+            const joinTime = document.getElementById('joinTime').value;
+            const unforgettableMemory = document.getElementById('unforgettableMemory').value;
+            const biggestChange = document.getElementById('biggestChange').value;
+            const confessionWords = document.getElementById('confessionWords').value;
+            const letterStyle = document.getElementById('letterStyle').value;
+
+            // 验证输入
+            if (!constellation || !nickname || !joinTime || !unforgettableMemory || !biggestChange || !confessionWords || !letterStyle) {
+                alert('请填写所有必填项目哦～ 😊');
+                return;
+            }
+
+            // 显示加载动画
+            const loadingDiv = document.getElementById('loadingDiv');
+            if (loadingDiv) {
+                loadingDiv.style.display = 'block';
+            }
+            
+            // 模拟加载时间
+            setTimeout(() => {
+                // 获取星座数据
+                const constellationInfo = constellationData[constellation];
+                const template = letterTemplates[letterStyle];
+
+                // 随机选择模板片段
+                const opening = template.opening[Math.floor(Math.random() * template.opening.length)];
+                const body = template.body.join('\n\n');
+                const ending = template.ending[Math.floor(Math.random() * template.ending.length)];
+
+                // 替换变量
+                let loveLetter = (opening + '\n\n' + body + '\n\n' + ending)
+                    .replace(/{joinTime}/g, joinTime)
+                    .replace(/{unforgettableMemory}/g, unforgettableMemory)
+                    .replace(/{biggestChange}/g, biggestChange)
+                    .replace(/{confessionWords}/g, confessionWords)
+                    .replace(/{nickname}/g, nickname);
+
+                // 生成运势内容
+                const fortuneContent = `
+                    <h3>🔮 ${nickname}的破局俱乐部运势</h3>
+                    <div style="margin: 20px 0;">
+                        <h4 style="color: #6c5ce7; margin-bottom: 10px;">
+                            ${constellationInfo.icon} ${constellationInfo.name} × 破局俱乐部
+                        </h4>
+                        <div style="font-size: 24px; font-weight: bold; color: #e17055; margin: 10px 0;">
+                            俱乐部契合度：${constellationInfo.matchPercent}%
+                        </div>
+                        <p style="margin-bottom: 15px;">
+                            <strong>性格特质：</strong>${constellationInfo.personality}
+                        </p>
+                        <p style="margin-bottom: 15px;">
+                            <strong>俱乐部身份：</strong>${constellationInfo.clubFit}
+                        </p>
+                    </div>
+                    <div style="margin: 20px 0; text-align: center; padding: 15px; background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%); border-radius: 10px;">
+                        <p style="margin-bottom: 10px;"><strong>💰 破局财运提示</strong></p>
+                        <p>下半年AI变现黄金期将在9-11月到来，现在正是在俱乐部积累技能的最佳时机！</p>
+                    </div>
+                    <div style="margin: 20px 0; text-align: center; padding: 15px; background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); border-radius: 10px;">
+                        <p style="margin-bottom: 10px;"><strong>❤️ 七夕特别祝福</strong></p>
+                        <p>愿你在破局俱乐部找到志同道合的伙伴，一起在AI的世界里创造属于我们的传奇故事！</p>
+                    </div>
+                `;
+
+                // 显示结果
+                document.getElementById('loveLetter').innerHTML = `
+                    <h2 style="text-align: center; margin-bottom: 25px; color: #e17055; font-size: 1.8em;">
+                        💕 ${nickname}的破局情书 💕
+                    </h2>
+                    <div style="line-height: 2.2; font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                        ${loveLetter.replace(/\n/g, '<br><br>')}
+                    </div>
+                    <p style="text-align: right; margin-top: 25px; font-style: italic; color: #636e72; font-size: 16px;">
+                        —— 来自${constellationInfo.name}的${nickname} ${constellationInfo.icon}
+                    </p>
+                `;
+
+                document.getElementById('fortune').innerHTML = fortuneContent;
+
+                // 隐藏加载，显示结果
+                if (loadingDiv) {
+                    loadingDiv.style.display = 'none';
+                }
+                document.getElementById('inputForm').style.display = 'none';
+                document.getElementById('resultContainer').style.display = 'block';
+
+                // 滚动到结果区域
+                setTimeout(() => {
+                    document.getElementById('resultContainer').scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+                
+                alert('✨ 你的破局情书已生成！');
+            }, 2000);
+        }
+        
+        // 重新生成函数
+        function generateAnother() {
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('inputForm').style.display = 'block';
+            
+            // 滚动到表单
+            document.getElementById('inputForm').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // 其他简化函数
+        function generateShareImage() {
+            alert('分享功能暂时不可用，请截图保存内容 📱');
+        }
+        
+        function generateLoveLetterImage() {
+            alert('长图生成功能暂时不可用，请截图保存内容 📷');
+        }
+        
+        function downloadImage() {
+            alert('下载功能暂时不可用，请截图保存内容 💾');
+        }
+        
+        function downloadLoveLetterImage() {
+            alert('下载功能暂时不可用，请截图保存内容 💾');
+        }
+        
+        // ==========================================================
+        
         // 注册Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
