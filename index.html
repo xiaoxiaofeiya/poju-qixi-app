@@ -2,12 +2,22 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=2.0, minimum-scale=1.0, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
-    <!-- 禁用缩放，提升移动端体验 -->
+    <!-- 移动端优化 -->
     <meta name="HandheldFriendly" content="true">
     <meta name="MobileOptimized" content="width">
+    <!-- iOS Safari 兼容性 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <!-- 强制HTTPS重定向脚本 -->
+    <script>
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            location.replace('https:' + window.location.href.substring(window.location.protocol.length));
+        }
+    </script>
     <title>AI破局七夕情缘 - 破局俱乐部专属APP</title>
     
     <!-- PWA配置 -->
@@ -532,23 +542,28 @@
             .form-group input, 
             .form-group select, 
             .form-group textarea {
-                font-size: 16px; /* 防止iOS缩放 */
-                padding: 15px;
+                font-size: 16px !important; /* 防止iOS缩放 */
+                padding: 15px !important;
                 border-radius: 12px;
-                border: 2px solid #e2e8f0;
-                -webkit-appearance: none;
-                appearance: none;
+                border: 2px solid #e2e8f0 !important;
+                -webkit-appearance: none !important;
+                appearance: none !important;
                 min-height: 50px;
-                box-sizing: border-box;
-                /* 修复移动端触摸问题 */
-                -webkit-user-select: text;
-                user-select: text;
-                -webkit-touch-callout: default;
-                touch-action: manipulation;
-                /* 确保输入框可点击 */
-                pointer-events: auto;
-                z-index: 10;
-                position: relative;
+                box-sizing: border-box !important;
+                /* Android修复 */
+                background-color: white !important;
+                color: #333 !important;
+                /* 确保输入框可交互 */
+                -webkit-user-select: text !important;
+                user-select: text !important;
+                -webkit-touch-callout: default !important;
+                touch-action: manipulation !important;
+                pointer-events: auto !important;
+                z-index: 1000 !important;
+                position: relative !important;
+                /* 移除任何可能的遮罩 */
+                outline: none !important;
+                -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
             }
             
             .form-group select {
@@ -655,19 +670,32 @@
             }
         }
 
-        /* 全局触摸优化 */
+        /* 全局触摸优化 - 修复Android问题 */
         * {
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
         }
 
-        /* 但允许表单元素选择文本 */
+        /* 只对非输入元素禁用选择，输入元素保持默认 */
+        body, div, span, h1, h2, h3, p, button {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        /* 表单元素强制启用交互 */
         input, textarea, select {
             -webkit-user-select: text !important;
             user-select: text !important;
             -webkit-touch-callout: default !important;
+            /* Android兼容性修复 */
+            -webkit-appearance: none !important;
+            appearance: none !important;
+            background-color: white !important;
+            /* 确保可点击 */
+            pointer-events: auto !important;
+            /* 移除所有可能的覆盖层影响 */
+            position: relative !important;
+            z-index: 999 !important;
         }
 
         /* 确保点击区域足够大 */
@@ -821,35 +849,59 @@
 
     <!-- PWA脚本 -->
     <script>
-        // PWA安装相关
+        // PWA安装相关 - 增强版本
         let deferredPrompt;
         let installPromptShown = false;
         
+        // 检测设备类型
+        function getMobileOperatingSystem() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return "iOS";
+            }
+            if (/android/i.test(userAgent)) {
+                return "Android";
+            }
+            return "unknown";
+        }
+        
+        // 检测是否已安装
+        function isInStandaloneMode() {
+            return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || 
+                   (window.navigator && window.navigator.standalone) ||
+                   document.referrer.includes('android-app://');
+        }
+        
+        // 显示安装提示
+        function showInstallPrompt() {
+            const installPrompt = document.getElementById('installPrompt');
+            if (installPrompt && !installPromptShown && !isInStandaloneMode()) {
+                installPrompt.style.display = 'block';
+                installPromptShown = true;
+                console.log('显示PWA安装提示');
+            }
+        }
+        
+        // beforeinstallprompt 事件处理
         window.addEventListener('beforeinstallprompt', (e) => {
             console.log('beforeinstallprompt 事件触发');
             e.preventDefault();
             deferredPrompt = e;
             
-            // 立即显示安装提示（移动端优化）
-            if (!installPromptShown) {
-                setTimeout(() => {
-                    showInstallPrompt();
-                }, 2000); // 2秒后显示
-            }
+            // 立即显示安装提示
+            setTimeout(() => {
+                showInstallPrompt();
+            }, 1000);
         });
         
-        function showInstallPrompt() {
-            const installPrompt = document.getElementById('installPrompt');
-            if (installPrompt && !installPromptShown) {
-                installPrompt.style.display = 'block';
-                installPromptShown = true;
-            }
-        }
-        
+        // 安装APP
         function installApp() {
+            const os = getMobileOperatingSystem();
+            
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
+                    console.log('用户选择:', choiceResult.outcome);
                     if (choiceResult.outcome === 'accepted') {
                         console.log('用户接受了安装');
                     }
@@ -857,8 +909,16 @@
                     document.getElementById('installPrompt').style.display = 'none';
                 });
             } else {
-                // 备用方案：显示手动安装指引
-                alert('请点击浏览器菜单中的"添加到主屏幕"或"安装"选项');
+                // 根据系统显示不同提示
+                let message = '';
+                if (os === 'iOS') {
+                    message = '请点击Safari底部的分享按钮，然后选择"添加到主屏幕"';
+                } else if (os === 'Android') {
+                    message = '请点击浏览器菜单中的"添加到主屏幕"或"安装应用"';
+                } else {
+                    message = '请点击浏览器菜单中的"安装"或"添加到主屏幕"选项';
+                }
+                alert(message);
             }
         }
         
@@ -867,35 +927,51 @@
             installPromptShown = true;
         }
         
-        // 检测iOS设备并显示安装提示
-        function isIOS() {
-            return /iPad|iPhone|iPod/.test(navigator.userAgent);
-        }
-        
-        function isInStandaloneMode() {
-            return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
-        }
-        
-        // iOS设备显示安装提示
-        if (isIOS() && !isInStandaloneMode()) {
-            setTimeout(() => {
-                showInstallPrompt();
-            }, 3000);
-        }
+        // 页面加载后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            const os = getMobileOperatingSystem();
+            console.log('检测到设备:', os);
+            console.log('是否为独立模式:', isInStandaloneMode());
+            
+            // 如果是移动设备且未安装，显示安装提示
+            if ((os === 'iOS' || os === 'Android') && !isInStandaloneMode()) {
+                // 延迟显示，让用户先看到内容
+                setTimeout(() => {
+                    showInstallPrompt();
+                }, 3000);
+            }
+        });
         
         // 注册Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js')
                 .then(registration => {
-                    console.log('SW注册成功');
-                    // Service Worker 注册成功后也显示安装提示
-                    if (!installPromptShown) {
+                    console.log('SW注册成功:', registration);
+                    
+                    // SW注册成功后，如果还没有显示安装提示，则显示
+                    if (!installPromptShown && !isInStandaloneMode()) {
                         setTimeout(() => {
                             showInstallPrompt();
                         }, 5000);
                     }
                 })
-                .catch(error => console.log('SW注册失败', error));
+                .catch(error => {
+                    console.log('SW注册失败:', error);
+                    // 即使SW注册失败，也尝试显示安装提示
+                    if (!installPromptShown && !isInStandaloneMode()) {
+                        setTimeout(() => {
+                            showInstallPrompt();
+                        }, 6000);
+                    }
+                });
+        } else {
+            console.log('浏览器不支持Service Worker');
+            // 不支持SW也显示安装提示
+            if (!installPromptShown && !isInStandaloneMode()) {
+                setTimeout(() => {
+                    showInstallPrompt();
+                }, 4000);
+            }
         }
     </script>
     
